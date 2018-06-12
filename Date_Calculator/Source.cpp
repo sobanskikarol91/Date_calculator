@@ -4,8 +4,8 @@ using namespace std;
 
 int main()
 {
-	Data d1(31,12,1945);
-	int dni = 0;
+	Data d1(12,06,2018), d2(20,19,20);
+	int dni = 9000;
 	
 	Data d3 = d1 + dni;
 
