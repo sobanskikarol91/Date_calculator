@@ -6,25 +6,24 @@ using namespace std;
 #define ILOSC_MIESIECY 12
 #define DNI_PRZESTEPNE 366
 #define DNI_NIEPRZESTEPNE 365
-typedef unsigned int ui;
 
 class Data
 {
-	ui dzien;
-	ui miesiac;
-	ui rok;
-	short * dni_miesiaca;
+	int dzien;
+	int miesiac;
+	int rok;
+	int * dni_miesiaca;
 public:
 	Data() : Data(0, 0, 0) {}
-	Data(ui dzien) : Data(dzien, 0, 0) {}
-	Data(ui dzien, ui miesiac, ui rok) : dzien(dzien), miesiac(miesiac), rok(rok)
+	Data(int dzien) : Data(dzien, 0, 0) {}
+	Data(int dzien, int miesiac, int rok) : dzien(dzien), miesiac(miesiac), rok(rok)
 	{
 		utworz_miesiace();
 		try
 		{
 			//sprawdzenie_daty();
 		}
-		catch (ui blad)
+		catch (int blad)
 		{
 			if (blad == 0) cerr << "Niepoprawny miesiac i dzien" << endl;
 			else if (blad == 1) cerr << "Niepoprawny miesiac" << endl;
@@ -36,16 +35,16 @@ public:
 
 	~Data()
 	{
-		// uiuwamy dynamicznie przydzielona pamiec
+		// intuwamy dynamicznie przydzielona pamiec
 		delete[] dni_miesiaca;
 	}
 
-	Data operator+(ui dodaj_dni)
+	Data operator+(int dodaj_dni)
 	{
-		ui suma_dni_do_dodania = oblicz_dni_od_poczatku_roku() + dodaj_dni;
-		ui obliczony_rok = oblicz_lata(suma_dni_do_dodania, rok);
+		int suma_dni_do_dodania = oblicz_dni_od_poczatku_roku() + dodaj_dni;
+		int obliczony_rok = oblicz_lata(suma_dni_do_dodania, rok);
 		cout << "dni od poczatku:" << suma_dni_do_dodania << endl;
-		ui obliczony_miesiac = oblicz_ile_miesiecy(suma_dni_do_dodania, obliczony_rok);
+		int obliczony_miesiac = oblicz_ile_miesiecy(suma_dni_do_dodania, obliczony_rok);
 		cout << "dni od poczatku:" << suma_dni_do_dodania << endl;
 
 		return Data(suma_dni_do_dodania, obliczony_miesiac, obliczony_rok);
@@ -53,14 +52,38 @@ public:
 
 	Data operator+(Data data)
 	{
-		ui dni_do_dodania = oblicz_dni_od_poczatku_roku() + data.oblicz_dni_od_poczatku_roku();
+		int dni_do_dodania = oblicz_dni_od_poczatku_roku() + data.oblicz_dni_od_poczatku_roku();
 		cout << "Dni od poczatku: " << dni_do_dodania << endl;
 		
-		ui obliczony_rok =  oblicz_lata(dni_do_dodania, rok + data.rok);
-		ui obliczony_miesiac = oblicz_ile_miesiecy(dni_do_dodania, obliczony_rok);
-
+		int obliczony_rok =  oblicz_lata(dni_do_dodania, rok + data.rok);
+		cout << "Dni na miesiace: " << dni_do_dodania << endl;
+		int obliczony_miesiac = oblicz_ile_miesiecy(dni_do_dodania, obliczony_rok);
 
 		return  Data(dni_do_dodania, obliczony_miesiac, obliczony_rok);
+	}
+
+	Data operator-(int dni_ktore_odejmujemy)
+	{
+		int roznica_dni = oblicz_dni_od_poczatku_roku() -  dni_ktore_odejmujemy;
+		cout << "Dni od poczatku " << dni_ktore_odejmujemy;
+		int obliczony_rok=0;
+		cout << "Roznica dni: " << roznica_dni << endl;
+		if (roznica_dni)
+		{
+
+		}
+		else
+		{
+			roznica_dni *= (-1);
+			obliczony_rok = rok - oblicz_lata(roznica_dni, rok);
+			cout << "Roznica lat:" << obliczony_rok << endl;
+
+		}
+
+		//int obliczony_miesiac = oblicz_ile_miesiecy(suma_dni_do_dodania, obliczony_rok);
+		//cout << "dni od poczatku:" << suma_dni_do_dodania << endl;
+
+		return Data(0, 0, obliczony_rok);
 	}
 
 
@@ -69,7 +92,7 @@ public:
 		return ekran << d.dzien << "-" << d.miesiac << "-" << d.rok << endl;
 	}
 
-	bool czy_przestepny(ui rok)
+	bool czy_przestepny(int rok)
 	{
 		return ((rok % 4 == 0) && (rok % 100 != 0)) || (rok % 400 == 0);
 	}
@@ -92,20 +115,20 @@ public:
 	{
 		short luty = czy_przestepny(rok) ? 29 : 28;
 		// tworzymy dynamicznie aby to od razu zainicjalizowac w 1 linijce
-		dni_miesiaca = new short[ILOSC_MIESIECY] { 31, luty, 31, 30, 31, 31, 30, 31, 30, 31, 30, 31};
+		dni_miesiaca = new int[ILOSC_MIESIECY] { 31, luty, 31, 30, 31, 31, 30, 31, 30, 31, 30, 31};
 	}
 
 	// obliczamy ile lat jest z podanych dni
-	ui oblicz_lata(ui & dni, ui licz_od_roku)
+	int oblicz_lata(int & dni, int licz_od_roku)
 	{
-		ui dni_w_roku;
+		int dni_w_roku;
 
 		// jezeli dni jest wiecej niz w danym roku 
 		while (dni > (dni_w_roku = ile_dni_ma_rok(licz_od_roku)))
 		{
 			cout << "rok: " << licz_od_roku << "  " << ile_dni_ma_rok(licz_od_roku) << endl;
 			dni -= dni_w_roku;
-			//cout << dni << endl;
+			cout << dni << endl;
 			licz_od_roku++;
 		}
 		return licz_od_roku;
@@ -126,7 +149,7 @@ public:
 		return dni_roku;
 	}
 
-	short oblicz_ile_miesiecy(ui & dni, ui obliczony_rok)
+	short oblicz_ile_miesiecy(int & dni, int obliczony_rok)
 	{
 		short dni_w_miesiacu=0, nr_miesiac = 1;
 
@@ -143,7 +166,7 @@ public:
 		return nr_miesiac;
 	}
 
-	ui ile_dni_ma_rok(ui rok)
+	int ile_dni_ma_rok(int rok)
 	{
 		return czy_przestepny(rok) ? DNI_PRZESTEPNE : DNI_NIEPRZESTEPNE;
 	}
