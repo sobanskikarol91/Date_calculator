@@ -42,7 +42,7 @@ public:
 	Data operator+(int dodaj_dni)
 	{
 		int suma_dni_do_dodania = oblicz_dni_od_poczatku_roku() + dodaj_dni;
-		int obliczony_rok = oblicz_lata(suma_dni_do_dodania, rok);
+		int obliczony_rok = oblicz_lata_po_dodaniu_dni(suma_dni_do_dodania, rok);
 		cout << "dni od poczatku:" << suma_dni_do_dodania << endl;
 		int obliczony_miesiac = oblicz_ile_miesiecy(suma_dni_do_dodania, obliczony_rok);
 		cout << "dni od poczatku:" << suma_dni_do_dodania << endl;
@@ -54,8 +54,8 @@ public:
 	{
 		int dni_do_dodania = oblicz_dni_od_poczatku_roku() + data.oblicz_dni_od_poczatku_roku();
 		cout << "Dni od poczatku: " << dni_do_dodania << endl;
-		
-		int obliczony_rok =  oblicz_lata(dni_do_dodania, rok + data.rok);
+
+		int obliczony_rok = oblicz_lata_po_dodaniu_dni(dni_do_dodania, rok + data.rok);
 		cout << "Dni na miesiace: " << dni_do_dodania << endl;
 		int obliczony_miesiac = oblicz_ile_miesiecy(dni_do_dodania, obliczony_rok);
 
@@ -64,26 +64,22 @@ public:
 
 	Data operator-(int dni_ktore_odejmujemy)
 	{
-		int roznica_dni = oblicz_dni_od_poczatku_roku() -  dni_ktore_odejmujemy;
-		cout << "Dni od poczatku " << dni_ktore_odejmujemy;
-		int obliczony_rok=0;
+		int roznica_dni = oblicz_dni_od_poczatku_roku() - dni_ktore_odejmujemy;
+		int obliczony_rok=rok, obliczony_miesiac = 0;
 		cout << "Roznica dni: " << roznica_dni << endl;
-		if (roznica_dni)
-		{
 
-		}
-		else
+		if (roznica_dni < 0)
 		{
 			roznica_dni *= (-1);
-			obliczony_rok = rok - oblicz_lata(roznica_dni, rok);
+			obliczony_rok = oblicz_lata_po_odjeciu_dni(roznica_dni, rok);
 			cout << "Roznica lat:" << obliczony_rok << endl;
-
+		}
+		if(roznica_dni > 0)
+		{
+			 obliczony_miesiac = oblicz_ile_miesiecy(roznica_dni, obliczony_rok);
 		}
 
-		//int obliczony_miesiac = oblicz_ile_miesiecy(suma_dni_do_dodania, obliczony_rok);
-		//cout << "dni od poczatku:" << suma_dni_do_dodania << endl;
-
-		return Data(0, 0, obliczony_rok);
+		return Data(roznica_dni, obliczony_miesiac, obliczony_rok);
 	}
 
 
@@ -115,22 +111,43 @@ public:
 	{
 		short luty = czy_przestepny(rok) ? 29 : 28;
 		// tworzymy dynamicznie aby to od razu zainicjalizowac w 1 linijce
-		dni_miesiaca = new int[ILOSC_MIESIECY] { 31, luty, 31, 30, 31, 31, 30, 31, 30, 31, 30, 31};
+		dni_miesiaca = new int[ILOSC_MIESIECY] { 31, luty, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	}
 
-	// obliczamy ile lat jest z podanych dni
-	int oblicz_lata(int & dni, int licz_od_roku)
+
+	int oblicz_lata_po_dodaniu_dni(int & dni_do_dodania, int licz_od_roku)
 	{
 		int dni_w_roku;
 
 		// jezeli dni jest wiecej niz w danym roku 
-		while (dni > (dni_w_roku = ile_dni_ma_rok(licz_od_roku)))
+		while (dni_do_dodania > (dni_w_roku = ile_dni_ma_rok(licz_od_roku)))
 		{
 			cout << "rok: " << licz_od_roku << "  " << ile_dni_ma_rok(licz_od_roku) << endl;
-			dni -= dni_w_roku;
-			cout << dni << endl;
+			dni_do_dodania -= dni_w_roku;
+			cout << dni_do_dodania << endl;
 			licz_od_roku++;
 		}
+		return licz_od_roku;
+	}
+
+	int oblicz_lata_po_odjeciu_dni(int & pozostale_dni, int licz_od_roku)
+	{
+		int dni_w_roku;
+
+		cout << "ile dni przed odejmowaniem " << pozostale_dni << endl;
+
+		while (pozostale_dni > 0)
+		{
+			dni_w_roku = ile_dni_ma_rok(licz_od_roku);
+			cout << "Dni w roku: " << dni_w_roku << "  Odejmij" << pozostale_dni << endl;
+
+			dni_w_roku -= pozostale_dni;
+			pozostale_dni -= ile_dni_ma_rok(licz_od_roku);
+			licz_od_roku--;
+		}
+
+		pozostale_dni = dni_w_roku;
+		cout << "dni po udejmownaiu: " << dni_w_roku << endl;
 		return licz_od_roku;
 	}
 
@@ -143,23 +160,24 @@ public:
 
 		// dodajemy pelne miesiace do dni
 		for (size_t i = 0; i < miesiac - 1; i++)
-			dni_roku += oblicz_ile_dni_w_miesiacu(rok,i);
+			dni_roku += oblicz_ile_dni_w_miesiacu(rok, i);
 
 		cout << "dni od poczatku:" << dni_roku << endl;
 		return dni_roku;
 	}
 
-	short oblicz_ile_miesiecy(int & dni, int obliczony_rok)
+	short oblicz_ile_miesiecy(int & pozostale_dni, int obliczony_rok)
 	{
-		short dni_w_miesiacu=0, nr_miesiac = 1;
+		short dni_w_miesiacu = 0, nr_miesiac = 1;
 
-		cout << "Obliczony rok: " << obliczony_rok << endl;
+		cout << "Oblicz miesiace: " << pozostale_dni << endl;
 		// jezeli dni jest wiecej niz w danym roku 
-		while (dni > (dni_w_miesiacu = oblicz_ile_dni_w_miesiacu(obliczony_rok, nr_miesiac -1)))
+
+		while (pozostale_dni > (dni_w_miesiacu = oblicz_ile_dni_w_miesiacu(obliczony_rok, nr_miesiac - 1)) )
 		{
-			cout << "Od Dni: " << dni << " Odejmnij: " << dni_w_miesiacu << endl;
-			dni -= dni_w_miesiacu;
-			cout << dni << endl;
+			cout << "Od Dni: " << pozostale_dni << " Odejmnij: " << dni_w_miesiacu << endl;
+			pozostale_dni -= dni_w_miesiacu;
+			cout << pozostale_dni << endl;
 			nr_miesiac++;
 		}
 		// zwracamy ile jest pelnych miesiecy
